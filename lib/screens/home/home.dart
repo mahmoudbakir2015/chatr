@@ -1,3 +1,4 @@
+import 'package:chatr/screens/home/chat/chat_list_page.dart';
 import 'package:chatr/screens/home/search/search.dart';
 import 'package:flutter/material.dart';
 
@@ -24,12 +25,7 @@ class _HomeState extends State<Home> {
     // 🔎 صفحة البحث
     Search(query: query, searchController: _searchController),
     // 💬 صفحة المحادثة (بسيطة مبدئياً)
-    const Center(
-      child: Text(
-        "Chat Page",
-        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-      ),
-    ),
+    ChatPageList(),
   ];
 
   @override

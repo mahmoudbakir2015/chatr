@@ -128,6 +128,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                     formKey: _formKey,
                                     emailAddress: _emailController.text,
                                     password: _passwordController.text,
+                                    name: _nameController.text,
                                   ).then((_) {
                                     setState(() {
                                       isLoading = false;
