@@ -3,8 +3,7 @@ import 'package:chatr/screens/home/search/search.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
-  final String token;
-  const Home({super.key, required this.token});
+  const Home({super.key});
 
   @override
   State<Home> createState() => _HomeState();
@@ -23,7 +22,7 @@ class _HomeState extends State<Home> {
   // 🟢 شاشات التنقل
   List<Widget> get _pages => [
     // 🔎 صفحة البحث
-    Search(token: widget.token),
+    Search(),
     // 💬 صفحة المحادثة (بسيطة مبدئياً)
     ChatPageList(),
   ];

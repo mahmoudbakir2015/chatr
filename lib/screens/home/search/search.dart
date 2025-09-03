@@ -1,11 +1,10 @@
 import 'dart:developer';
-
+import 'package:chatr/utils/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class Search extends StatefulWidget {
-  final String token;
-  const Search({super.key, required this.token});
+  const Search({super.key});
 
   @override
   State<Search> createState() => _SearchState();
@@ -13,10 +12,24 @@ class Search extends StatefulWidget {
 
 class _SearchState extends State<Search> {
   String searchQuery = "";
+  String? myToken;
+  @override
+  void initState() {
+    super.initState();
+    _loadToken();
+  }
+
+  Future<void> _loadToken() async {
+    String? token = await TokenStorage.getToken();
+    setState(() {
+      myToken = token;
+    });
+    log(token.toString(), name: 'search token');
+  }
 
   @override
   Widget build(BuildContext context) {
-    log(widget.token);
+    log(myToken.toString(), name: 'search token');
     return Column(
       children: [
         Padding(
@@ -70,7 +83,7 @@ class _SearchState extends State<Search> {
                 itemCount: users.length,
                 itemBuilder: (context, index) {
                   final user = users[index];
-                  return user['uid'] == widget.token
+                  return user['uid'] == myToken
                       ? Center(child: Text("No users found"))
                       : ListTile(
                           leading: const CircleAvatar(

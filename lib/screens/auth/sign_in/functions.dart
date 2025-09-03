@@ -2,6 +2,7 @@
 import 'dart:developer';
 import 'package:chatr/screens/auth/sign_up/sign_up.dart';
 import 'package:chatr/screens/home/home.dart';
+import 'package:chatr/utils/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -38,14 +39,13 @@ Future<void> signInWithEmailAndPassword({
     await FirebaseAuth.instance
         .signInWithEmailAndPassword(email: emailAddress, password: password)
         .then((value) {
+          TokenStorage.saveToken(value.user!.uid);
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(const SnackBar(content: Text("✅ Login Successful")));
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => Home(token: value.user!.uid),
-            ),
-          );
+          Navigator.of(
+            context,
+          ).pushReplacement(MaterialPageRoute(builder: (context) => Home()));
         })
         .catchError((error) {
           ScaffoldMessenger.of(

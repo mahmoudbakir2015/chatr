@@ -2,6 +2,7 @@
 
 import 'dart:developer';
 import 'package:chatr/screens/home/home.dart';
+import 'package:chatr/utils/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -39,14 +40,13 @@ Future signUpWithEmailANdPassword({
             uid: value.user!.uid,
             context: context,
           ).then((e) {
+            TokenStorage.saveToken(value.user!.uid);
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("✅ Sign Up Successful")),
             );
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => Home(token: value.user!.uid),
-              ),
-            );
+            Navigator.of(
+              context,
+            ).pushReplacement(MaterialPageRoute(builder: (context) => Home()));
           });
           log('User signed in: ${value.user?.uid}');
         })
