@@ -38,12 +38,14 @@ Future signUpWithEmailANdPassword({
             email: emailAddress,
             uid: value.user!.uid,
             context: context,
-          ).then((value) {
+          ).then((e) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("✅ Sign Up Successful")),
             );
             Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const Home()),
+              MaterialPageRoute(
+                builder: (context) => Home(token: value.user!.uid),
+              ),
             );
           });
           log('User signed in: ${value.user?.uid}');

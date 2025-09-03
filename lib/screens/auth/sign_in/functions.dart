@@ -42,7 +42,9 @@ Future<void> signInWithEmailAndPassword({
             context,
           ).showSnackBar(const SnackBar(content: Text("✅ Login Successful")));
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const Home()),
+            MaterialPageRoute(
+              builder: (context) => Home(token: value.user!.uid),
+            ),
           );
         })
         .catchError((error) {

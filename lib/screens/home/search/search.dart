@@ -1,48 +1,94 @@
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-// ignore: must_be_immutable
 class Search extends StatefulWidget {
-  final TextEditingController searchController;
-  String query;
-  Search({super.key, required this.query, required this.searchController});
+  final String token;
+  const Search({super.key, required this.token});
 
   @override
   State<Search> createState() => _SearchState();
 }
 
 class _SearchState extends State<Search> {
+  String searchQuery = "";
+
   @override
   Widget build(BuildContext context) {
+    log(widget.token);
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12.0),
           child: TextField(
-            controller: widget.searchController,
             decoration: InputDecoration(
-              hintText: "Search...",
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              hintText: "Search by name...",
               prefixIcon: const Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
             ),
             onChanged: (value) {
               setState(() {
-                widget.query = value;
+                searchQuery = value.trim();
               });
             },
           ),
         ),
-        widget.query.isEmpty
-            ? const Text("Start typing to search...")
-            : Text(
-                "Result: ${widget.query}",
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+
+        // 📋 Search Results
+        Expanded(
+          child: StreamBuilder<QuerySnapshot>(
+            stream: searchQuery.isEmpty
+                ? const Stream.empty()
+                : FirebaseFirestore.instance
+                      .collection('users')
+                      .where('name', isGreaterThanOrEqualTo: searchQuery)
+                      .where('name', isLessThanOrEqualTo: "$searchQuery\uf8ff")
+                      .snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Center(child: CircularProgressIndicator()),
+                    const SizedBox(height: 20),
+                    Text("Start typing to search for users"),
+                  ],
+                );
+              }
+
+              final users = snapshot.data!.docs;
+
+              if (users.isEmpty) {
+                return const Center(child: Text("No users found"));
+              }
+
+              return ListView.builder(
+                itemCount: users.length,
+                itemBuilder: (context, index) {
+                  final user = users[index];
+                  return user['uid'] == widget.token
+                      ? Center(child: Text("No users found"))
+                      : ListTile(
+                          leading: const CircleAvatar(
+                            child: Icon(Icons.person),
+                          ),
+                          title: Text(user['name'] ?? "Unknown"),
+                          subtitle: Text(user['email'] ?? ""),
+                          trailing: ElevatedButton.icon(
+                            onPressed: () {},
+                            label: Icon(Icons.chat),
+                            icon: Text("Chat"),
+                          ),
+                        );
+                },
+              );
+            },
+          ),
+        ),
       ],
     );
   }
