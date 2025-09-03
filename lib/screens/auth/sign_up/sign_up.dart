@@ -13,10 +13,11 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  final nameController = TextEditingController();
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final confirmController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmController = TextEditingController();
+  bool isLoading = false;
 
   bool obscurePassword = true;
 
@@ -43,10 +44,10 @@ class _SignUpScreenState extends State<SignUpScreen>
   @override
   void dispose() {
     _animationController.dispose();
-    nameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    confirmController.dispose();
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmController.dispose();
     super.dispose();
   }
 
@@ -95,33 +96,47 @@ class _SignUpScreenState extends State<SignUpScreen>
                         const SizedBox(height: 24),
 
                         // Fields
-                        buildNameField(nameController: nameController),
+                        buildNameField(nameController: _nameController),
                         const SizedBox(height: 16),
-                        buildEmailField(emailController: emailController),
+                        buildEmailField(emailController: _emailController),
                         const SizedBox(height: 16),
                         buildPasswordField(
-                          passwordController: passwordController,
+                          passwordController: _passwordController,
                           obscurePassword: obscurePassword,
                           toggleObscurePassword: toggleObscure,
                         ),
                         const SizedBox(height: 16),
                         buildConfirmPasswordField(
-                          confirmController: confirmController,
-                          passwordController: passwordController,
+                          confirmController: _confirmController,
+                          passwordController: _passwordController,
                           obscurePassword: obscurePassword,
                           toggleObscurePassword: toggleObscure,
                         ),
                         const SizedBox(height: 24),
 
                         // Button
-                        buildButtons(
-                          isSignUp: true,
-                          submit: () {
-                            submit(context: context, formKey: _formKey);
-                          },
-                          context: context,
-                          formKey: _formKey,
-                        ),
+                        isLoading
+                            ? const CircularProgressIndicator()
+                            : buildButtons(
+                                isSignUp: true,
+                                submit: () {
+                                  setState(() {
+                                    isLoading = true;
+                                  });
+                                  submit(
+                                    context: context,
+                                    formKey: _formKey,
+                                    emailAddress: _emailController.text,
+                                    password: _passwordController.text,
+                                  ).then((_) {
+                                    setState(() {
+                                      isLoading = false;
+                                    });
+                                  });
+                                },
+                                context: context,
+                                formKey: _formKey,
+                              ),
                         const SizedBox(height: 12),
 
                         // Bottom Text
