@@ -41,9 +41,9 @@ Future<void> signInWithEmailAndPassword({
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(const SnackBar(content: Text("✅ Login Successful")));
-          Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (context) => const Home()));
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const Home()),
+          );
         })
         .catchError((error) {
           ScaffoldMessenger.of(

@@ -1,16 +1,58 @@
+import 'package:chatr/screens/home/search/search.dart';
 import 'package:flutter/material.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
   const Home({super.key});
+
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  final TextEditingController _searchController = TextEditingController();
+  String query = "";
+  int _currentIndex = 0;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  // 🟢 شاشات التنقل
+  List<Widget> get _pages => [
+    // 🔎 صفحة البحث
+    Search(query: query, searchController: _searchController),
+    // 💬 صفحة المحادثة (بسيطة مبدئياً)
+    const Center(
+      child: Text(
+        "Chat Page",
+        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+      ),
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Text(
-          "Welcome Home!",
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+
+        title: Text(_currentIndex == 0 ? "Search" : "Chat"),
+        centerTitle: true,
+      ),
+      body: _pages[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Chat"),
+        ],
       ),
     );
   }
