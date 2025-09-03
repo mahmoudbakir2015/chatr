@@ -19,6 +19,7 @@ class _SignInScreenState extends State<SignInScreen>
   late Animation<double> _fadeAnimation;
 
   bool _obscurePassword = true;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -95,13 +96,27 @@ class _SignInScreenState extends State<SignInScreen>
                           },
                         ),
                         const SizedBox(height: 24),
-                        buildButtons(
-                          context: context,
-                          formKey: _formKey,
-                          submit: () {
-                            submit(context: context, formKey: _formKey);
-                          },
-                        ),
+                        isLoading
+                            ? const CircularProgressIndicator()
+                            : buildButtons(
+                                context: context,
+                                formKey: _formKey,
+                                submit: () {
+                                  setState(() {
+                                    isLoading = true;
+                                  });
+                                  submit(
+                                    context: context,
+                                    formKey: _formKey,
+                                    emailAddress: _emailController.text,
+                                    password: _passwordController.text,
+                                  ).then((_) {
+                                    setState(() {
+                                      isLoading = false;
+                                    });
+                                  });
+                                },
+                              ),
                         const SizedBox(height: 12),
                         buildBottomSection(
                           goTo: () {
