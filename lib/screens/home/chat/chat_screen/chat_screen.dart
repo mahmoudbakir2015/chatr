@@ -1,12 +1,13 @@
 import 'dart:developer';
 import 'package:chatr/screens/home/chat/chat_screen/functions.dart';
+import 'package:chatr/screens/home/chat/chat_screen/items.dart';
 import 'package:chatr/utils/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
-  final String userId; // 🔥 الـ uid بتاع الشخص اللي هتتكلم معاه
-  final String userName; // 🔥 اسم الشخص اللي ظاهر في العنوان
+  final String userId;
+  final String userName;
 
   const ChatScreen({super.key, required this.userId, required this.userName});
 
@@ -16,19 +17,17 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
+  final ValueNotifier<bool> _canSend = ValueNotifier(false);
+
   String? myToken;
 
   @override
   void initState() {
     _loadToken();
+    _messageController.addListener(() {
+      _canSend.value = _messageController.text.trim().isNotEmpty;
+    });
     super.initState();
-  }
-
-  // 👇 dispose controller
-  @override
-  void dispose() {
-    _messageController.dispose();
-    super.dispose();
   }
 
   Future<void> _loadToken() async {
@@ -40,7 +39,18 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   @override
+  void dispose() {
+    _messageController.dispose();
+    _canSend.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (myToken == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
       appBar: AppBar(title: Text("Chat with ${widget.userName}")),
       body: Column(
@@ -55,35 +65,30 @@ class _ChatScreenState extends State<ChatScreen> {
                   .orderBy('timestamp', descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) {
+                if (snapshot.hasError) {
+                  return Center(child: Text("Error: ${snapshot.error}"));
+                }
+                if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                final messages = snapshot.data!.docs;
+                final messages = snapshot.data?.docs ?? [];
+
+                if (messages.isEmpty) {
+                  return const Center(child: Text("No messages yet"));
+                }
 
                 return ListView.builder(
-                  reverse: true, // 🔄 يخلي الرسائل الجديدة تحت
+                  reverse: true,
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final msg = messages[index];
-                    final isMe = msg['senderId'] == myToken; // 🔥
+                    final isMe = msg['senderId'] == myToken;
 
-                    return Align(
-                      alignment: isMe
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(
-                          vertical: 4,
-                          horizontal: 8,
-                        ),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: isMe ? Colors.blue[100] : Colors.grey[300],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(msg['message'] ?? ""),
-                      ),
+                    return MessageBubble(
+                      text: msg['message'] ?? "",
+                      isMe: isMe,
+                      timestamp: (msg['timestamp'] as Timestamp?)?.toDate(),
                     );
                   },
                 );
@@ -108,13 +113,20 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.send, color: Colors.blueAccent),
-                    onPressed: () {
-                      sendMessage(
-                        myToken: myToken!,
-                        userId: widget.userId,
-                        messageController: _messageController,
+                  ValueListenableBuilder<bool>(
+                    valueListenable: _canSend,
+                    builder: (context, canSend, _) {
+                      return IconButton(
+                        icon: const Icon(Icons.send, color: Colors.blueAccent),
+                        onPressed: canSend
+                            ? () {
+                                sendMessage(
+                                  myToken: myToken!,
+                                  userId: widget.userId,
+                                  messageController: _messageController,
+                                );
+                              }
+                            : null,
                       );
                     },
                   ),

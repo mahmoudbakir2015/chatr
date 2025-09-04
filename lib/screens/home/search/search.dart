@@ -45,7 +45,7 @@ class _SearchState extends State<Search> {
             ),
             onChanged: (value) {
               setState(() {
-                searchQuery = value.trim();
+                searchQuery = value.trim().toLowerCase();
               });
             },
           ),
@@ -90,7 +90,10 @@ class _SearchState extends State<Search> {
                           leading: const CircleAvatar(
                             child: Icon(Icons.person),
                           ),
-                          title: Text(user['name'] ?? "Unknown"),
+                          title: Text(
+                            user['name'].toString().toUpperCase(),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
                           subtitle: Text(user['email'] ?? ""),
                           trailing: ElevatedButton.icon(
                             onPressed: () {

@@ -73,13 +73,20 @@ Future<void> addUserToDatabase({
   required BuildContext context,
 }) async {
   CollectionReference users = FirebaseFirestore.instance.collection('users');
-  // Call the user's CollectionReference to add a new user
+
   return users
-      .add({'name': name, 'uid': uid, 'email': email})
+      .doc(uid) // 🔹 نخلي doc هو الـ uid
+      .set({
+        'name': name.trim().toLowerCase(),
+        'uid': uid,
+        'email': email,
+      }, SetOptions(merge: true)) // merge عشان ما يضيعش البيانات القديمة
       .then((value) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("✅ User Added to Database")),
         );
       })
-      .catchError((error) => log("Failed to add user: $error"));
+      .catchError((error) {
+        debugPrint("❌ Failed to add user: $error");
+      });
 }

@@ -25,7 +25,7 @@ class _HomeState extends State<Home> {
     // 🔎 صفحة البحث
     Search(),
     // 💬 صفحة المحادثة (بسيطة مبدئياً)
-    ChatPageList(),
+    ChatsListScreen(),
   ];
 
   @override
