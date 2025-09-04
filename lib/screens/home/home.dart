@@ -1,4 +1,5 @@
 import 'package:chatr/screens/home/chat/chat_list_page.dart';
+import 'package:chatr/screens/home/functions.dart';
 import 'package:chatr/screens/home/search/search.dart';
 import 'package:flutter/material.dart';
 
@@ -35,6 +36,15 @@ class _HomeState extends State<Home> {
 
         title: Text(_currentIndex == 0 ? "Search" : "Chat"),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.red),
+            onPressed: () async {
+              // تنفيذ تسجيل الخروج
+              await signOut(context);
+            },
+          ),
+        ],
       ),
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
