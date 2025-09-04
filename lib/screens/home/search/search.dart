@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:chatr/screens/home/chat/chat_screen/chat_screen.dart';
 import 'package:chatr/utils/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -92,7 +93,16 @@ class _SearchState extends State<Search> {
                           title: Text(user['name'] ?? "Unknown"),
                           subtitle: Text(user['email'] ?? ""),
                           trailing: ElevatedButton.icon(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => ChatScreen(
+                                    userId: user['uid'],
+                                    userName: user['name'] ?? "Unknown",
+                                  ),
+                                ),
+                              );
+                            },
                             label: Icon(Icons.chat),
                             icon: Text("Chat"),
                           ),
