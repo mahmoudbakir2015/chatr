@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:chatr/screens/home/chat/chat_screen/chat_screen.dart';
@@ -34,7 +33,6 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Chats")),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('chats')
@@ -45,24 +43,56 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
           if (snapshot.hasError) {
             return Center(child: Text("Error: ${snapshot.error}"));
           }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text("No chats yet"));
+
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (!snapshot.hasData || snapshot.data == null) {
+            return const Center(child: Text("No data available"));
           }
 
           final chats = snapshot.data!.docs;
+
+          if (chats.isEmpty) {
+            return const Center(child: Text("No chats yet"));
+          }
 
           return ListView.builder(
             itemCount: chats.length,
             itemBuilder: (context, index) {
               final chat = chats[index];
-              final participants = List<String>.from(chat['participants']);
-              final otherUserId = participants.firstWhere(
-                (id) => id != myToken,
-              );
-              log(otherUserId, name: 'chat otherUserId');
+              final chatData = chat.data() as Map<String, dynamic>?;
 
-              final lastMessage = chat['lastMessage'] ?? "";
-              final lastTimestamp = (chat['lastTimestamp'] as Timestamp?)
+              if (chatData == null) {
+                return const ListTile(
+                  leading: CircleAvatar(child: Icon(Icons.error)),
+                  title: Text("Invalid chat data"),
+                );
+              }
+
+              final participants = List<String>.from(
+                chatData['participants'] ?? [],
+              );
+
+              // البحث عن المستخدم الآخر في المحادثة
+              String? otherUserId;
+              for (final id in participants) {
+                if (id != myToken) {
+                  otherUserId = id;
+                  break;
+                }
+              }
+
+              if (otherUserId == null || otherUserId.isEmpty) {
+                return const ListTile(
+                  leading: CircleAvatar(child: Icon(Icons.error)),
+                  title: Text("Invalid participant"),
+                );
+              }
+
+              final lastMessage = chatData['lastMessage'] ?? "";
+              final lastTimestamp = (chatData['lastTimestamp'] as Timestamp?)
                   ?.toDate();
 
               return FutureBuilder<DocumentSnapshot>(
@@ -71,24 +101,67 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
                     .doc(otherUserId)
                     .get(),
                 builder: (context, userSnapshot) {
-                  if (!userSnapshot.hasData) {
+                  if (userSnapshot.connectionState == ConnectionState.waiting) {
                     return const ListTile(
-                      leading: CircleAvatar(child: Icon(Icons.person)),
-                      title: Text("Loading..."),
+                      leading: CircleAvatar(child: CircularProgressIndicator()),
+                      title: Text("Loading user..."),
                     );
                   }
 
-                  final userData =
-                      userSnapshot.data!.data() as Map<String, dynamic>?;
+                  if (userSnapshot.hasError) {
+                    return ListTile(
+                      leading: const CircleAvatar(child: Icon(Icons.error)),
+                      title: const Text("Error loading user"),
+                      subtitle: Text("ID: $otherUserId"),
+                    );
+                  }
 
-                  final userName = userData!['name'] ?? "Unknown";
-                  log(userName, name: 'chat userName');
+                  if (!userSnapshot.hasData || userSnapshot.data == null) {
+                    return ListTile(
+                      leading: const CircleAvatar(
+                        child: Icon(Icons.person_off),
+                      ),
+                      title: const Text("User data not available"),
+                      subtitle: Text("ID: $otherUserId"),
+                    );
+                  }
+
+                  final userDoc = userSnapshot.data!;
+
+                  if (!userDoc.exists) {
+                    return ListTile(
+                      leading: const CircleAvatar(
+                        child: Icon(Icons.person_off),
+                      ),
+                      title: const Text("User not found"),
+                      subtitle: Text("ID: $otherUserId"),
+                    );
+                  }
+
+                  final userData = userDoc.data();
+
+                  if (userData == null) {
+                    return ListTile(
+                      leading: const CircleAvatar(child: Icon(Icons.error)),
+                      title: const Text("No user data available"),
+                      subtitle: Text("ID: $otherUserId"),
+                    );
+                  }
+
+                  final userDataMap = userData as Map<String, dynamic>;
+                  final userName =
+                      userDataMap['name']?.toString() ?? "Unknown User";
 
                   return ListTile(
-                    leading: const CircleAvatar(child: Icon(Icons.person)),
+                    leading: CircleAvatar(
+                      child: Text(
+                        userName.isNotEmpty ? userName[0].toUpperCase() : "?",
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
                     title: Text(userName),
                     subtitle: Text(
-                      lastMessage,
+                      lastMessage.isNotEmpty ? lastMessage : "No messages yet",
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -103,7 +176,7 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (_) => ChatScreen(
-                            userId: otherUserId,
+                            userId: otherUserId!,
                             userName: userName,
                           ),
                         ),
