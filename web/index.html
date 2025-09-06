@@ -1,56 +1,51 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-  <base href="$FLUTTER_BASE_HREF">
-
   <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="Chatr Flutter Web App">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="chatr">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
-
-  <!-- Favicon -->
+  <title>Chatr</title>
+  <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>chatr</title>
-  <link rel="manifest" href="manifest.json">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-messaging-compat.js"></script>
 </head>
 <body>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <!-- Firebase Configuration -->
   <script>
-      var firebaseConfig = {
-        apiKey: "...",
-        authDomain: "[YOUR_PROJECT].firebaseapp.com",
-        databaseURL: "https://[YOUR_PROJECT].firebaseio.com",
-        projectId: "[YOUR_PROJECT]",
-        storageBucket: "[YOUR_PROJECT].appspot.com",
-        messagingSenderId: "...",
-        appId: "1:...:web:...",
-        measurementId: "G-...",
-      };
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDQWBy-5T12kkzmsw_cKPo-dntnLsYVcMs",
+      authDomain: "chatr-dd82f.firebaseapp.com",
+      projectId: "chatr-dd82f",
+      storageBucket: "chatr-dd82f.firebasestorage.app",
+      messagingSenderId: "590015773117",
+      appId: "1:590015773117:web:d52bb5218822210b19bad4",
+      measurementId: "G-GH0LE3PEY1"
+    };
 
-      // Initialize Firebase
-      firebase.initializeApp(firebaseConfig);
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('firebase-messaging-sw.js')
+        .then((registration) => {
+          console.log('Service Worker registered:', registration.scope);
+          messaging.useServiceWorker(registration);
+        })
+        .catch((err) => console.error('Service Worker registration failed:', err));
+    }
+
+    // Request permission to send notifications
+    messaging.requestPermission()
+      .then(() => messaging.getToken({ vapidKey: vapidkey }))
+      .then((token) => console.log('FCM Token:', token))
+      .catch((err) => console.error('Permission denied or error:', err));
   </script>
 
   <script src="flutter_bootstrap.js" async></script>

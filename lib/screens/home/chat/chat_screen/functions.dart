@@ -42,12 +42,14 @@ Future<void> sendMessage({
       'timestamp': now,
     });
 
-    // 🟢 استدعاء إرسال الإشعار للمستقبل فقط
-    await sendPushMessage(
-      receiverId: otherUserId,
-      senderId: myId,
-      message: text,
-    );
+    // 🟢 استدعاء إرسال الإشعار للمستقبل فقط إذا المستقبل مش هو المرسل
+    if (myId != otherUserId) {
+      await sendPushMessage(
+        receiverId: otherUserId,
+        senderId: myId,
+        message: text,
+      );
+    }
 
     messageController.clear();
   } catch (e) {
@@ -62,7 +64,7 @@ Future<void> sendPushMessage({
   required String message,
 }) async {
   try {
-    // 📌 جيب بيانات المستقبل من Firestore
+    // 📌 بيانات المستقبل
     final userDoc = await FirebaseFirestore.instance
         .collection('users')
         .doc(receiverId)
@@ -73,41 +75,40 @@ Future<void> sendPushMessage({
       return;
     }
 
-    // 🔹 قائمة التوكنز (multi-device support)
     final tokens = List<String>.from(userDoc['fcmTokens'] ?? []);
+    if (tokens.isEmpty) return;
 
-    if (tokens.isEmpty) {
-      debugPrint("⚠️ No tokens found for user: $receiverId");
-      return;
-    }
+    // 📌 بيانات الراسل
+    final senderDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(senderId)
+        .get();
 
-    // 📂 اقرأ ملف service-account.json
+    final senderName = senderDoc.exists
+        ? senderDoc['name'] ?? "مستخدم"
+        : "مستخدم";
+
+    // 📂 ملف service-account.json
     final serviceAccountJson = await rootBundle.loadString(
       'assets/service_account.json',
     );
     final serviceAccount = json.decode(serviceAccountJson);
 
-    // 🎫 Credentials
     final accountCredentials = ServiceAccountCredentials.fromJson(
       serviceAccount,
     );
-
-    // 🎯 Scopes
     const scopes = ['https://www.googleapis.com/auth/firebase.messaging'];
-
-    // 🔑 Auth client
     final client = await clientViaServiceAccount(accountCredentials, scopes);
 
-    // 🆔 Project ID من ملف JSON
     final projectId = serviceAccount['project_id'];
 
-    // 🔁 ابعت الإشعار لكل توكن نشط للمستقبل فقط
     for (final token in tokens) {
       await _sendNotificationToToken(
         client: client,
         projectId: projectId,
         token: token,
         senderId: senderId,
+        senderName: senderName, // اسم الراسل يظهر في الإشعار
         message: message,
       );
     }
@@ -124,6 +125,7 @@ Future<void> _sendNotificationToToken({
   required String projectId,
   required String token,
   required String senderId,
+  required String senderName, // الاسم هنا
   required String message,
 }) async {
   final url = Uri.parse(
@@ -133,8 +135,15 @@ Future<void> _sendNotificationToToken({
   final bodyData = {
     "message": {
       "token": token,
-      "notification": {"title": "📩 رسالة جديدة", "body": message},
-      "data": {"senderId": senderId, "message": message},
+      "notification": {
+        "title": "📩 رسالة من $senderName", // ✨ اسم الراسل
+        "body": message,
+      },
+      "data": {
+        "senderId": senderId,
+        "message": message,
+        "senderName": senderName,
+      },
     },
   };
 

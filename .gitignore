@@ -33,6 +33,7 @@ migrate_working_dir/
 .pub/
 /build/
 assets/service_account.json
+lib/const/api_key.dart
 
 # Symbolication related
 app.*.symbols
