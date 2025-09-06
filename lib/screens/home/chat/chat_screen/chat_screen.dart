@@ -121,8 +121,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         onPressed: canSend
                             ? () {
                                 sendMessage(
-                                  myToken: myToken!,
-                                  userId: widget.userId,
+                                  myId: myToken!,
+                                  otherUserId: widget.userId,
                                   messageController: _messageController,
                                 );
                               }

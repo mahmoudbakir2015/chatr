@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:chatr/screens/home/chat/chat_list_page.dart';
 import 'package:chatr/screens/home/functions.dart';
 import 'package:chatr/screens/home/search/search.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
@@ -13,6 +16,17 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final TextEditingController _searchController = TextEditingController();
   int _currentIndex = 0;
+  void requestPermission() async {
+    NotificationSettings settings = await FirebaseMessaging.instance
+        .requestPermission(alert: true, badge: true, sound: true);
+    log("🔔 الصلاحيات: ${settings.authorizationStatus}");
+  }
+
+  @override
+  void initState() {
+    requestPermission();
+    super.initState();
+  }
 
   @override
   void dispose() {
