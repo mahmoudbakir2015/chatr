@@ -1,11 +1,11 @@
 import 'dart:developer';
+import 'package:chatr/screens/onboard/onboard.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:chatr/utils/services.dart';
-import 'package:chatr/screens/auth/sign_in/sign_in.dart';
 import 'package:chatr/screens/home/home.dart';
 import 'package:chatr/const/api_key.dart';
 import 'package:chatr/utils/notification_service.dart';
@@ -97,7 +97,7 @@ class MyApp extends StatelessWidget {
           // 🔹 عرض الصفحة المناسبة حسب تسجيل الدخول
           return FirebaseAuth.instance.currentUser != null
               ? const Home()
-              : const SignInScreen();
+              : const OnboardingScreen();
         },
       ),
     );

@@ -49,13 +49,67 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
           }
 
           if (!snapshot.hasData || snapshot.data == null) {
-            return const Center(child: Text("No data available"));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.data_exploration_outlined,
+                    size: 80,
+                    color: Colors.grey.withValues(blue: 0, green: 0, red: 0),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    "No Data Available",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    "There is currently no data to display. Please check back later.",
+                    style: TextStyle(fontSize: 16, color: Colors.black54),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
           }
 
           final chats = snapshot.data!.docs;
 
           if (chats.isEmpty) {
-            return const Center(child: Text("No chats yet"));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.chat_bubble_outline,
+                    size: 80,
+                    color: Colors.grey.withValues(blue: 0, green: 0, red: 0),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    "No Chats Yet",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    "Start a conversation by sending a message to your friends",
+                    style: TextStyle(fontSize: 16, color: Colors.black54),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
           }
 
           return ListView.builder(

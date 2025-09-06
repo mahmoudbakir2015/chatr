@@ -67,9 +67,42 @@ class _SearchState extends State<Search> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Center(child: CircularProgressIndicator()),
-                    const SizedBox(height: 20),
-                    Text("Start typing to search for users"),
+                    // أيقونة كبيرة
+                    Icon(
+                      Icons.search,
+                      size: 80,
+                      color: Colors.blueAccent.withOpacity(0.7),
+                    ),
+                    const SizedBox(height: 30),
+
+                    // النص الرئيسي
+                    Text(
+                      "Find your friends",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                        shadows: [
+                          Shadow(
+                            offset: Offset(0, 2),
+                            blurRadius: 4,
+                            color: Colors.black12,
+                          ),
+                        ],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 10),
+
+                    // النص الفرعي
+                    Text(
+                      "Start typing to search for users",
+                      style: TextStyle(fontSize: 16, color: Colors.black54),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 25),
+
+                    // مؤشر تحميل عصري
                   ],
                 );
               }
